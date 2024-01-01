@@ -1,0 +1,83 @@
+package com.pooh.discordspring.service.impl;
+
+import com.pooh.discordspring.dto.LoginDto;
+import com.pooh.discordspring.dto.RegisterDto;
+import com.pooh.discordspring.entity.Role;
+import com.pooh.discordspring.entity.User;
+import com.pooh.discordspring.exceptions.ErrorAPIException;
+import com.pooh.discordspring.repository.RoleRepository;
+import com.pooh.discordspring.repository.UserRepository;
+import com.pooh.discordspring.security.JwtTokenProvider;
+import com.pooh.discordspring.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
+@Service
+public class AuthServiceImpl implements AuthService {
+
+
+    @Autowired
+    public AuthServiceImpl(UserRepository userRepository,
+                           RoleRepository roleRepository,
+                           PasswordEncoder passwordEncoder,
+                           AuthenticationManager authenticationManager,
+                           JwtTokenProvider jwtTokenProvider){
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+    }
+    private UserRepository userRepository;
+    private RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
+    private AuthenticationManager authenticationManager;
+
+    private JwtTokenProvider jwtTokenProvider;
+    @Override
+    public String register(RegisterDto registerDto) {
+        //check if username already exists
+        if (userRepository.existsByUsername(registerDto.getUsername())) {
+            throw new ErrorAPIException(HttpStatus.BAD_REQUEST,"Username Already Exists");
+        }
+        if (userRepository.existsByEmail(registerDto.getEmail())) {
+            throw new ErrorAPIException(HttpStatus.BAD_REQUEST,"Email Already Exists");
+        }
+        User user = new User();
+        user.setEmail(registerDto.getEmail());
+        user.setName(registerDto.getName());
+        user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        user.setUsername(registerDto.getUsername());
+
+        Set<Role> roleSet = new HashSet<>();
+        Role role =roleRepository.findRoleByName("ROLE_USER");
+        roleSet.add(role);
+
+        user.setRoles(roleSet);
+        userRepository.save(user);
+
+        return "User Added Successfully";
+    }
+
+
+    @Override
+    public String login(LoginDto loginDto) {
+
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginDto.getUsernameOrEmail(),loginDto.getPassword()
+        ));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String token = jwtTokenProvider.generateToken(authentication);
+        return token;
+    }
+}
