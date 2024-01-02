@@ -6,7 +6,10 @@ import java.util.List;
 
 public interface UserService {
 
-//    public UserDto addFriend(String token,Long friendId);
+    public UserDto addFriend(String token,String friendUsername);
+    public UserDto getFriends(String username);
+
+    public String sendFriendRequest(String token, String friendUsername);
 //
 //    public List<UserDto> getFriends(String token);
 //

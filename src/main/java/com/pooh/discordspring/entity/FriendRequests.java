@@ -11,8 +11,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "user_friends")
-public class UserFriends {
+@Table(name = "friend_requests")
+public class FriendRequests {
+
     @Id
     @Column
     private Long friendId;
@@ -20,6 +21,4 @@ public class UserFriends {
     @ManyToOne
     @JoinColumn(name = "userId",nullable = false)
     private User user;
-
-
 }

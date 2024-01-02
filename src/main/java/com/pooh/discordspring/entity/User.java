@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,9 +38,10 @@ public class User {
     @JoinTable(name = "user_friends", joinColumns = @JoinColumn(name = "userId") , inverseJoinColumns = @JoinColumn(name = "friendId") )
     private List<User> userFriends;
 
-//    @ManyToMany
-//    @JoinTable(name = "user_friend_requests", joinColumns = @JoinColumn(name = "userId") , inverseJoinColumns = @JoinColumn(name = "friendId") )
-//    private List<User> friendRequests;
+    @ManyToMany
+    @JoinTable(name = "friend_requests", joinColumns = @JoinColumn(name = "userId") , inverseJoinColumns = @JoinColumn(name = "friendId") )
+    private Set<User> friendRequests;
+
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JoinTable(
@@ -47,12 +49,25 @@ public class User {
             joinColumns = @JoinColumn(name="user_id",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id",referencedColumnName = "id")
     )
-//
-//    public void addFriend(User friend){
-//        if(userFriends == null){
-//            userFriends=new ArrayList<>();
-//        }
-//        userFriends.add(friend);
-//    }
     private Set<Role> roles;
+    public void addFriend(User friend){
+        if(userFriends == null){
+            userFriends=new ArrayList<>();
+        }
+        userFriends.add(friend);
+    }
+    public List<String> getFriendsNames(){
+        List<String> friendNames = new ArrayList<>();
+        for(User friend:userFriends){
+            friendNames.add(friend.getName());
+        }
+        return friendNames;
+    }
+
+    public void getFriendRequest(User friend){
+        if(friendRequests == null){
+            friendRequests = new HashSet<>();
+        }
+        friendRequests.add(friend);
+    }
 }
