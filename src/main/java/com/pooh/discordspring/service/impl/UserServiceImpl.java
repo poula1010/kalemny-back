@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class UserServiceImpl implements UserService {
     private JwtTokenProvider tokenProvider;
@@ -38,16 +41,24 @@ public class UserServiceImpl implements UserService {
             userRepository.save(friend);
         }
 
-        UserDto returnDto = new UserDto(user.getName(),user.getId(),user.getFriendsNames());
+        UserDto returnDto = new UserDto(user.getName(),user.getId(),user.getImage());
         return returnDto;
     }
 
     @Override
-    public UserDto getFriends(String username) {
+    public UserDto getFriend(String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
-        return new UserDto(user.getName(),user.getId(),user.getFriendsNames());
+        return new UserDto(user.getName(),user.getId(),user.getImage());
     }
-
+    @Override
+    public List<UserDto> getFriends(String token) {
+        String username = "";
+        if(StringUtils.hasText(token)&&tokenProvider.validateToken(token)){
+            username = tokenProvider.getUsername(token);
+        }
+        User user = userRepository.findByUsername(username).orElseThrow();
+        return user.getUserFriends().stream().map(User::userToDto).collect(Collectors.toList());
+    }
     @Override
     public String sendFriendRequest(String token, String friendUsername) {
         String username = "";
@@ -63,5 +74,10 @@ public class UserServiceImpl implements UserService {
         userRepository.save(friend);
 
         return "Friend Request Sent Successfully";
+    }
+
+    @Override
+    public List<String> getRelatedUsernames(String username) {
+        return userRepository.findRelatedUsernames(username);
     }
 }

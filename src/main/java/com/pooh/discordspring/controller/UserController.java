@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin("*")
@@ -22,7 +23,11 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
+    @GetMapping("/name")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<String>> getPossibleUsers(@RequestHeader Map<String, String> headers,@RequestBody String friendUsername){
+        return new ResponseEntity<>(userService.getRelatedUsernames(friendUsername),HttpStatus.OK);
+    }
     @PostMapping("/friends")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserDto> addFriend(@RequestHeader Map<String, String> headers,@RequestBody String friendUsername) {
@@ -49,10 +54,23 @@ public class UserController {
             throw new ErrorAPIException(HttpStatus.BAD_REQUEST, "invalid User");
         }
     }
-    @GetMapping("/friends")
+    @GetMapping("/friend")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserDto> getFriend(@RequestHeader Map<String, String> headers,@RequestBody String username) {
 
-        return new ResponseEntity<>(userService.getFriends(username),HttpStatus.OK);
+        return new ResponseEntity<>(userService.getFriend(username),HttpStatus.OK);
+    }
+    @GetMapping("/friends")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<UserDto>> getFriends(@RequestHeader Map<String, String> headers) {
+        String token;
+        try {
+            token = headers.get("authorization");
+            token = token.split(" ")[1];
+            List<UserDto> response = userService.getFriends(token);
+            return new ResponseEntity<>(response,HttpStatus.OK);
+        } catch (Exception e) {
+            throw new ErrorAPIException(HttpStatus.BAD_REQUEST, "invalid User");
+        }
     }
 }

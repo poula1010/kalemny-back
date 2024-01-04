@@ -1,5 +1,6 @@
 package com.pooh.discordspring.entity;
 
+import com.pooh.discordspring.dto.UserDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +34,9 @@ public class User {
 
     @Column(nullable = false,name = "password")
     private String password;
+
+    @Column(name="image",nullable = false)
+    private String image;
 
     @ManyToMany
     @JoinTable(name = "user_friends", joinColumns = @JoinColumn(name = "userId") , inverseJoinColumns = @JoinColumn(name = "friendId") )
@@ -69,5 +73,9 @@ public class User {
             friendRequests = new HashSet<>();
         }
         friendRequests.add(friend);
+    }
+
+    public static UserDto userToDto(User user){
+        return new UserDto(user.getUsername(),user.getId(),user.getImage());
     }
 }

@@ -16,5 +16,6 @@ import java.util.List;
 public class UserDto {
     private String name;
     private Long id;
-    private List<String> friendsNames;
+//    private List<UserDto> friends;
+    private String image;
 }
