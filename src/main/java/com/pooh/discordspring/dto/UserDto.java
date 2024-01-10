@@ -14,8 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 
 public class UserDto {
-    private String name;
+    private String username;
     private Long id;
+    private String email;
 //    private List<UserDto> friends;
     private String image;
 }

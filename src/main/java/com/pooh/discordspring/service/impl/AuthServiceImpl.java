@@ -1,7 +1,9 @@
 package com.pooh.discordspring.service.impl;
 
+import com.pooh.discordspring.dto.JwtAuthResponse;
 import com.pooh.discordspring.dto.LoginDto;
 import com.pooh.discordspring.dto.RegisterDto;
+import com.pooh.discordspring.dto.UserDto;
 import com.pooh.discordspring.entity.Role;
 import com.pooh.discordspring.entity.User;
 import com.pooh.discordspring.exceptions.ErrorAPIException;
@@ -9,6 +11,7 @@ import com.pooh.discordspring.repository.RoleRepository;
 import com.pooh.discordspring.repository.UserRepository;
 import com.pooh.discordspring.security.JwtTokenProvider;
 import com.pooh.discordspring.service.AuthService;
+import io.jsonwebtoken.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -69,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public String login(LoginDto loginDto) {
+    public JwtAuthResponse login(LoginDto loginDto) {
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getUsernameOrEmail(),loginDto.getPassword()
@@ -78,6 +81,11 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = jwtTokenProvider.generateToken(authentication);
-        return token;
+        String username = jwtTokenProvider.getUsername(token);
+        UserDto responseDto = User.userToDto(userRepository.findByUsername(username).orElseThrow());
+        JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
+        jwtAuthResponse.setAccessToken(token);
+        jwtAuthResponse.setUserDto(responseDto);
+        return jwtAuthResponse;
     }
 }

@@ -41,14 +41,14 @@ public class UserServiceImpl implements UserService {
             userRepository.save(friend);
         }
 
-        UserDto returnDto = new UserDto(user.getName(),user.getId(),user.getImage());
+        UserDto returnDto = User.userToDto(user);
         return returnDto;
     }
 
     @Override
     public UserDto getFriend(String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
-        return new UserDto(user.getName(),user.getId(),user.getImage());
+        return User.userToDto(user);
     }
     @Override
     public List<UserDto> getFriends(String token) {

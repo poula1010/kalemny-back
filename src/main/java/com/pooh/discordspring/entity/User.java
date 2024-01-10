@@ -76,6 +76,6 @@ public class User {
     }
 
     public static UserDto userToDto(User user){
-        return new UserDto(user.getUsername(),user.getId(),user.getImage());
+        return new UserDto(user.getUsername(),user.getId(), user.getEmail(), user.getImage());
     }
 }
