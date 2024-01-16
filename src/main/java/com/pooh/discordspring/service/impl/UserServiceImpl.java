@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,34 +21,32 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl(JwtTokenProvider jwtTokenProvider,UserRepository userRepository){
         this.tokenProvider=jwtTokenProvider;
         this.userRepository= userRepository;
+
     }
     @Override
-    public UserDto addFriend(String token, String  friendUsername) {
+    public void addFriend(String token, String  friendUsername) {
         String username = "";
         if(StringUtils.hasText(token)&&tokenProvider.validateToken(token)){
             username = tokenProvider.getUsername(token);
         }
         User user = userRepository.findByUsername(username).orElseThrow();
         User friend = userRepository.findByUsername(friendUsername).orElseThrow();
-        if(user.getFriendRequests().contains(friend)){
-            user.getFriendRequests().remove(friend);
-            friend.getFriendRequests().remove(user);
 
-            user.addFriend(friend);
-            userRepository.save(user);
-            friend.addFriend(user);
-            userRepository.save(friend);
-        }
+        user.addFriend(friend);
+        friend.addFriend(user);
 
-        UserDto returnDto = User.userToDto(user);
-        return returnDto;
+        user.removeFriendRequest(friend);
+        friend.removeFriendRequest(user);
+        // Save the user with the updated friend list
+        userRepository.save(user);
+        userRepository.save(friend);
     }
 
-    @Override
-    public UserDto getFriend(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow();
-        return User.userToDto(user);
-    }
+//    @Override
+//    public UserDto getFriend(String username) {
+//        User user = userRepository.findByUsername(username).orElseThrow();
+//        return User.userToDto(user);
+//    }
     @Override
     public List<UserDto> getFriends(String token) {
         String username = "";
@@ -57,7 +54,7 @@ public class UserServiceImpl implements UserService {
             username = tokenProvider.getUsername(token);
         }
         User user = userRepository.findByUsername(username).orElseThrow();
-        return user.getUserFriends().stream().map(User::userToDto).collect(Collectors.toList());
+        return user.getFriends().stream().map(User::userToDto).collect(Collectors.toList());
     }
     @Override
     public String sendFriendRequest(String token, String friendUsername) {

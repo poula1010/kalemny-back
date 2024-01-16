@@ -3,6 +3,7 @@ package com.pooh.discordspring.controller;
 import com.pooh.discordspring.dto.JwtAuthResponse;
 import com.pooh.discordspring.dto.LoginDto;
 import com.pooh.discordspring.dto.RegisterDto;
+import com.pooh.discordspring.dto.StringMessageDto;
 import com.pooh.discordspring.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,8 +22,8 @@ public class AuthController {
     }
     @PreAuthorize("permitAll()")
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
-        String response = authService.register(registerDto);
+    public ResponseEntity<StringMessageDto> register(@RequestBody RegisterDto registerDto){
+        StringMessageDto response = new StringMessageDto(authService.register(registerDto));
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
     @PreAuthorize("permitAll()")

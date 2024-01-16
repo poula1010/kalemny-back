@@ -13,6 +13,7 @@ import com.pooh.discordspring.security.JwtTokenProvider;
 import com.pooh.discordspring.service.AuthService;
 import io.jsonwebtoken.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,11 +22,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 @Service
 public class AuthServiceImpl implements AuthService {
-
+    @Autowired
+    private Environment env;
 
     @Autowired
     public AuthServiceImpl(UserRepository userRepository,
@@ -59,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
         user.setName(registerDto.getName());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setUsername(registerDto.getUsername());
-
+        user.setImage("atef2");
         Set<Role> roleSet = new HashSet<>();
         Role role =roleRepository.findRoleByName("ROLE_USER");
         roleSet.add(role);
@@ -86,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
         JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
         jwtAuthResponse.setAccessToken(token);
         jwtAuthResponse.setUserDto(responseDto);
+        jwtAuthResponse.setTokenExpiration(new Date().getTime() + Long.parseLong(Objects.requireNonNull(env.getProperty("app.jwt-expiration"))) );
         return jwtAuthResponse;
     }
 }

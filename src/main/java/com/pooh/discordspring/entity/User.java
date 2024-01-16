@@ -38,13 +38,21 @@ public class User {
     @Column(name="image",nullable = false)
     private String image;
 
-    @ManyToMany
-    @JoinTable(name = "user_friends", joinColumns = @JoinColumn(name = "userId") , inverseJoinColumns = @JoinColumn(name = "friendId") )
-    private List<User> userFriends;
-
-    @ManyToMany
-    @JoinTable(name = "friend_requests", joinColumns = @JoinColumn(name = "userId") , inverseJoinColumns = @JoinColumn(name = "friendId") )
+    @ManyToMany()
+    @JoinTable(
+            name = "friend_requests",
+            joinColumns = @JoinColumn(name="friend_id"),
+            inverseJoinColumns = @JoinColumn(name="user_id")
+    )
     private Set<User> friendRequests;
+
+    @ManyToMany()
+    @JoinTable(
+            name="friendships",
+            joinColumns = @JoinColumn(name="friend_id"),
+            inverseJoinColumns = @JoinColumn(name="user_id")
+    )
+    private List<User> friends;
 
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
@@ -54,20 +62,20 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id",referencedColumnName = "id")
     )
     private Set<Role> roles;
-    public void addFriend(User friend){
-        if(userFriends == null){
-            userFriends=new ArrayList<>();
-        }
-        userFriends.add(friend);
-    }
-    public List<String> getFriendsNames(){
-        List<String> friendNames = new ArrayList<>();
-        for(User friend:userFriends){
-            friendNames.add(friend.getName());
-        }
-        return friendNames;
-    }
 
+//    public List<String> getFriendsNames(){
+//        List<String> friendNames = new ArrayList<>();
+//        for(Friend friend:friends){
+//            friendNames.add(friend.getUser().getName());
+//        }
+//        return friendNames;
+//    }
+    public void addFriend(User user){
+        if(friends == null){
+            friends = new ArrayList<>();
+        }
+        friends.add(user);
+    }
     public void getFriendRequest(User friend){
         if(friendRequests == null){
             friendRequests = new HashSet<>();
@@ -75,6 +83,11 @@ public class User {
         friendRequests.add(friend);
     }
 
+    public void removeFriendRequest(User friend){
+        if(friendRequests.contains(friend)){
+            this.friendRequests.remove(friend);
+        }
+    }
     public static UserDto userToDto(User user){
         return new UserDto(user.getUsername(),user.getId(), user.getEmail(), user.getImage());
     }
