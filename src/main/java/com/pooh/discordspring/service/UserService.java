@@ -13,6 +13,7 @@ public interface UserService {
     public List<UserDto> getFriends(String token);
     public String sendFriendRequest(String token, String friendUsername);
 
+    public List<UserDto> getFriendRequests(String token);
     public List<UserDto> getRelatedUsernames(String username);
 
     public List<UserDto> getSentFriendRequests(long id);

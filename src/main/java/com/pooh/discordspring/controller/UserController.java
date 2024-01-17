@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,6 +69,19 @@ public class UserController {
         }
     }
 
+    @GetMapping("/friends/requests")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<UserDto>> getFriendRequests(@RequestHeader Map<String,String> headers){
+        String token;
+        try {
+            token = headers.get("authorization");
+            token = token.split(" ")[1];
+            List<UserDto> response = userService.getFriendRequests(token);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new ErrorAPIException(HttpStatus.BAD_REQUEST, "invalid User");
+        }
+    }
     // @GetMapping("/friend")
     // @PreAuthorize("hasRole('USER')")
     // public ResponseEntity<UserDto> getFriend(@RequestHeader Map<String, String>

@@ -93,4 +93,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username).orElseThrow();
 
     }
+    @Override
+    public List<UserDto> getFriendRequests(String token){
+        String username = tokenProvider.getUsername(token);
+        User user = userRepository.findByUsername(username).orElseThrow();
+        return user.getFriendRequests().stream().map(User::userToDto).collect(Collectors.toList());
+    }
 }
