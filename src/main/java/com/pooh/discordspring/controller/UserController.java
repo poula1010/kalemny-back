@@ -2,6 +2,7 @@ package com.pooh.discordspring.controller;
 
 import com.pooh.discordspring.dto.StringMessageDto;
 import com.pooh.discordspring.dto.UserDto;
+import com.pooh.discordspring.entity.User;
 import com.pooh.discordspring.exceptions.ErrorAPIException;
 import com.pooh.discordspring.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,15 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
+    @GetMapping("/sentFriendRequests")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<UserDto>> getSentFriendRequests(@RequestHeader Map<String,String> headers){
+        User user = userService.getUserFromHeaders(headers);
+        return new ResponseEntity<>(userService.getSentFriendRequests(user.getId()),HttpStatus.OK);
+    }
     @PostMapping("/name")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<String>> getPossibleUsers(@RequestHeader Map<String, String> headers,
+    public ResponseEntity<List<UserDto>> getPossibleUsers(@RequestHeader Map<String, String> headers,
             @RequestBody String friendUsername) {
         return new ResponseEntity<>(userService.getRelatedUsernames(friendUsername), HttpStatus.OK);
     }

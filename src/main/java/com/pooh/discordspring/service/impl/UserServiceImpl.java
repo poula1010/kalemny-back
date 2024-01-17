@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,7 +75,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> getRelatedUsernames(String username) {
-        return userRepository.findRelatedUsernames(username);
+    public List<UserDto> getRelatedUsernames(String username) {
+        return userRepository.findRelatedUsernames(username).stream().map(User::userToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDto> getSentFriendRequests(long id){
+        return userRepository.getSentFriendRequestsById(id).stream().map(User::userToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public User getUserFromHeaders(Map<String, String> headers) {
+        String token;
+        token = headers.get("authorization");
+        token = token.split(" ")[1];
+        String username = tokenProvider.getUsername(token);
+        return userRepository.findByUsername(username).orElseThrow();
+
     }
 }

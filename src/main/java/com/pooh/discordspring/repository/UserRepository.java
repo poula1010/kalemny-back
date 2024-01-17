@@ -15,7 +15,11 @@ public interface UserRepository extends JpaRepository<User,Long> {
     boolean existsByUsername(String username);
     Optional<User> findByUsernameOrEmail(String username,String email);
 
-    @Query(value = "SELECT username FROM users WHERE username LIKE %:name% ",
+    @Query(value = "SELECT * FROM users WHERE username LIKE %:name% ",
             nativeQuery = true)
-    List<String> findRelatedUsernames(@Param("name") String username);
+    List<User> findRelatedUsernames(@Param("name") String username);
+
+    @Query(value = "SELECT * FROM users JOIN friend_requests ON users.id=friend_requests.friend_id AND user_id=:id",
+    nativeQuery = true)
+    List<User> getSentFriendRequestsById(@Param("id") long id);
 }

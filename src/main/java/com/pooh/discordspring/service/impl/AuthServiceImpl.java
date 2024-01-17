@@ -15,6 +15,7 @@ import io.jsonwebtoken.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,10 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
 @Service
 public class AuthServiceImpl implements AuthService {
     @Autowired
@@ -93,4 +92,6 @@ public class AuthServiceImpl implements AuthService {
         jwtAuthResponse.setTokenExpiration(new Date().getTime() + Long.parseLong(Objects.requireNonNull(env.getProperty("app.jwt-expiration"))) );
         return jwtAuthResponse;
     }
+
+
 }
