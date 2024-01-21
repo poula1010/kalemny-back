@@ -53,7 +53,7 @@ public class User {
             joinColumns = @JoinColumn(name="friend_id"),
             inverseJoinColumns = @JoinColumn(name="user_id")
     )
-    private List<User> friends;
+    private Set<User> friends;
 
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
@@ -73,7 +73,10 @@ public class User {
 //    }
     public void addFriend(User user){
         if(friends == null){
-            friends = new ArrayList<>();
+            friends = new HashSet<>();
+        }
+        if(friends.contains(user)) {
+            return;
         }
         friends.add(user);
     }

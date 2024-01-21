@@ -1,6 +1,7 @@
 package com.pooh.discordspring.controller;
 
 import com.pooh.discordspring.dto.StringMessageDto;
+import com.pooh.discordspring.dto.SuccessOrFailDto;
 import com.pooh.discordspring.dto.UserDto;
 import com.pooh.discordspring.entity.User;
 import com.pooh.discordspring.exceptions.ErrorAPIException;
@@ -41,14 +42,14 @@ public class UserController {
 
     @PostMapping("/friends")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<StringMessageDto> addFriend(@RequestHeader Map<String, String> headers,
+    public ResponseEntity<SuccessOrFailDto> addFriend(@RequestHeader Map<String, String> headers,
             @RequestBody String friendUsername) {
         String token;
         try {
             token = headers.get("authorization");
             token = token.split(" ")[1];
             userService.addFriend(token, friendUsername);
-            return new ResponseEntity<>(new StringMessageDto("success"), HttpStatus.OK);
+            return new ResponseEntity<>(new SuccessOrFailDto(true), HttpStatus.OK);
         } catch (Exception e) {
             throw new ErrorAPIException(HttpStatus.BAD_REQUEST, "invalid User");
         }
@@ -56,13 +57,13 @@ public class UserController {
 
     @PostMapping("/friends/request")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> sendFriendRequest(@RequestHeader Map<String, String> headers,
+    public ResponseEntity<SuccessOrFailDto> sendFriendRequest(@RequestHeader Map<String, String> headers,
             @RequestBody String friendUsername) {
         String token;
         try {
             token = headers.get("authorization");
             token = token.split(" ")[1];
-            String response = userService.sendFriendRequest(token, friendUsername);
+            SuccessOrFailDto response = userService.sendFriendRequest(token, friendUsername);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             throw new ErrorAPIException(HttpStatus.BAD_REQUEST, "invalid User");
@@ -78,6 +79,19 @@ public class UserController {
             token = token.split(" ")[1];
             List<UserDto> response = userService.getFriendRequests(token);
             return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new ErrorAPIException(HttpStatus.BAD_REQUEST, "invalid User");
+        }
+    }
+    @DeleteMapping("friends/requests")
+    @PreAuthorize("hasRole('USER')")
+    public  ResponseEntity<SuccessOrFailDto> removeFriendRequest(@RequestHeader Map<String,String> headers,@RequestParam String username){
+        String token;
+        try {
+            token = headers.get("authorization");
+            token = token.split(" ")[1];
+            this.userService.removeFriendRequest(token,username);
+            return new ResponseEntity<>(new SuccessOrFailDto(true), HttpStatus.OK);
         } catch (Exception e) {
             throw new ErrorAPIException(HttpStatus.BAD_REQUEST, "invalid User");
         }

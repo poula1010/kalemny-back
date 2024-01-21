@@ -1,5 +1,6 @@
 package com.pooh.discordspring.service.impl;
 
+import com.pooh.discordspring.dto.SuccessOrFailDto;
 import com.pooh.discordspring.dto.UserDto;
 import com.pooh.discordspring.entity.User;
 import com.pooh.discordspring.repository.UserRepository;
@@ -58,7 +59,7 @@ public class UserServiceImpl implements UserService {
         return user.getFriends().stream().map(User::userToDto).collect(Collectors.toList());
     }
     @Override
-    public String sendFriendRequest(String token, String friendUsername) {
+    public SuccessOrFailDto sendFriendRequest(String token, String friendUsername) {
         String username = "";
         if(StringUtils.hasText(token)&&tokenProvider.validateToken(token)){
             username = tokenProvider.getUsername(token);
@@ -66,12 +67,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username).orElseThrow();
         User friend = userRepository.findByUsername(friendUsername).orElseThrow();
         if(friend.getFriendRequests().contains(user)){
-            return "There is Already a friend Request";
+           new SuccessOrFailDto(false);
         }
         friend.getFriendRequest(user);
         userRepository.save(friend);
 
-        return "Friend Request Sent Successfully";
+        return new SuccessOrFailDto(true);
     }
 
     @Override
@@ -82,6 +83,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getSentFriendRequests(long id){
         return userRepository.getSentFriendRequestsById(id).stream().map(User::userToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public void removeFriendRequest(String token, String friendUsername) {
+        String username = tokenProvider.getUsername(token);
+        User user = this.userRepository.findByUsername(username).orElseThrow();
+        User friend = this.userRepository.findByUsername(friendUsername).orElseThrow();
+        user.removeFriendRequest(friend);
+        this.userRepository.save(user);
     }
 
     @Override
