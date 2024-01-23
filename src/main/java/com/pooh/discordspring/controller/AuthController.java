@@ -1,10 +1,8 @@
 package com.pooh.discordspring.controller;
 
-import com.pooh.discordspring.dto.JwtAuthResponse;
-import com.pooh.discordspring.dto.LoginDto;
-import com.pooh.discordspring.dto.RegisterDto;
-import com.pooh.discordspring.dto.StringMessageDto;
+import com.pooh.discordspring.dto.*;
 import com.pooh.discordspring.service.AuthService;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +20,8 @@ public class AuthController {
     }
     @PreAuthorize("permitAll()")
     @PostMapping("/register")
-    public ResponseEntity<StringMessageDto> register(@RequestBody RegisterDto registerDto){
-        StringMessageDto response = new StringMessageDto(authService.register(registerDto));
+    public ResponseEntity<SuccessOrFailDto> register(@RequestBody RegisterDto registerDto){
+        SuccessOrFailDto response = authService.register(registerDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
     @PreAuthorize("permitAll()")
@@ -33,5 +31,19 @@ public class AuthController {
         JwtAuthResponse jwtAuthResponse= authService.login(loginDto);
 
         return new ResponseEntity<>(jwtAuthResponse,HttpStatus.OK);
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/username")
+    public ResponseEntity<Boolean> usernameAvailable(@RequestParam String username){
+        boolean available = authService.usernameAvailable(username);
+        return new ResponseEntity<Boolean>(available,HttpStatus.OK);
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/email")
+    public ResponseEntity<Boolean> emailAvailable(@RequestParam String email){
+        boolean available = authService.emailAvailable(email);
+        return new ResponseEntity<Boolean>(available,HttpStatus.OK);
     }
 }

@@ -1,9 +1,6 @@
 package com.pooh.discordspring.service.impl;
 
-import com.pooh.discordspring.dto.JwtAuthResponse;
-import com.pooh.discordspring.dto.LoginDto;
-import com.pooh.discordspring.dto.RegisterDto;
-import com.pooh.discordspring.dto.UserDto;
+import com.pooh.discordspring.dto.*;
 import com.pooh.discordspring.entity.Role;
 import com.pooh.discordspring.entity.User;
 import com.pooh.discordspring.exceptions.ErrorAPIException;
@@ -49,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
 
     private JwtTokenProvider jwtTokenProvider;
     @Override
-    public String register(RegisterDto registerDto) {
+    public SuccessOrFailDto register(RegisterDto registerDto) {
         //check if username already exists
         if (userRepository.existsByUsername(registerDto.getUsername())) {
             throw new ErrorAPIException(HttpStatus.BAD_REQUEST,"Username Already Exists");
@@ -70,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
         user.setRoles(roleSet);
         userRepository.save(user);
 
-        return "User Added Successfully";
+        return new SuccessOrFailDto(true);
     }
 
 
@@ -93,5 +90,13 @@ public class AuthServiceImpl implements AuthService {
         return jwtAuthResponse;
     }
 
+    @Override
+    public boolean usernameAvailable(String username) {
+        return  !userRepository.existsByUsername(username);
+    }
+    @Override
+    public boolean emailAvailable(String email){
+        return !userRepository.existsByEmail(email);
+    }
 
 }
