@@ -2,7 +2,10 @@ package com.pooh.discordspring.service.impl;
 
 import com.pooh.discordspring.dto.SuccessOrFailDto;
 import com.pooh.discordspring.dto.UserDto;
+import com.pooh.discordspring.entity.Messages;
+import com.pooh.discordspring.entity.Room;
 import com.pooh.discordspring.entity.User;
+import com.pooh.discordspring.repository.RoomRepository;
 import com.pooh.discordspring.repository.UserRepository;
 import com.pooh.discordspring.security.JwtTokenProvider;
 import com.pooh.discordspring.service.UserService;
@@ -10,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,10 +23,12 @@ public class UserServiceImpl implements UserService {
     private JwtTokenProvider tokenProvider;
     private UserRepository userRepository;
 
+    private RoomRepository roomRepository;
     @Autowired
-    public UserServiceImpl(JwtTokenProvider jwtTokenProvider,UserRepository userRepository){
+    public UserServiceImpl(JwtTokenProvider jwtTokenProvider,UserRepository userRepository,RoomRepository roomRepository){
         this.tokenProvider=jwtTokenProvider;
         this.userRepository= userRepository;
+        this.roomRepository = roomRepository;
 
     }
     @Override
@@ -103,6 +109,23 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username).orElseThrow();
 
     }
+
+    @Override
+    public void addMessageToRoom(String token, long roomId, String text) {
+        String username = tokenProvider.getUsername(token);
+        User user = userRepository.findByUsername(username).orElseThrow();
+        Room room = roomRepository.findById(roomId).orElseThrow();
+
+        if(room.getUsers().contains(user)){
+            Messages message = new Messages();
+            message.setTimeStamp(new Date());
+            message.setMessageContent(text);
+            message.setUser(user);
+            room.addMessage(message);
+            roomRepository.save(room);
+        }
+    }
+
     @Override
     public List<UserDto> getFriendRequests(String token){
         String username = tokenProvider.getUsername(token);

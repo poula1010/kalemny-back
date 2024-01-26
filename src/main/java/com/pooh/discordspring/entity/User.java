@@ -64,6 +64,13 @@ public class User {
     )
     private Set<Role> roles;
 
+    @ManyToMany(cascade = {CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH,CascadeType.DETACH})
+    @JoinTable(
+            name="room_users",
+            joinColumns = @JoinColumn(name="user_id"),
+            inverseJoinColumns = @JoinColumn(name = "room_id")
+    )
+    private List<Room> rooms;
 //    public List<String> getFriendsNames(){
 //        List<String> friendNames = new ArrayList<>();
 //        for(Friend friend:friends){
