@@ -1,5 +1,6 @@
 package com.pooh.discordspring.entity;
 
+import com.pooh.discordspring.dto.RoomDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name= "rooms")
@@ -49,5 +51,12 @@ public class Room {
             this.messages = new ArrayList<>();
         }
         this.messages.add(message);
+    }
+
+    public static RoomDto toRoomDto(Room room){
+        List<Long> userIds ;
+        userIds = room.getUsers().stream().map(User::getId).collect(Collectors.toList());
+        RoomDto roomDto = new RoomDto(userIds, room.getId(), room.getRoomName());
+        return roomDto;
     }
 }

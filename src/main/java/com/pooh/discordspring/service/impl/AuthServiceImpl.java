@@ -59,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
         user.setName(registerDto.getName());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setUsername(registerDto.getUsername());
-        user.setImage("atef2");
+        user.setImage("atef2.jpg");
         Set<Role> roleSet = new HashSet<>();
         Role role =roleRepository.findRoleByName("ROLE_USER");
         roleSet.add(role);

@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +41,18 @@ public class RoomController {
             return new ResponseEntity<>(new SuccessOrFailDto(false), HttpStatus.BAD_REQUEST);
         }
     }
-
+    @GetMapping("")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<RoomDto>> getRooms(@RequestHeader Map<String,String> header){
+        try{
+            String token = extractToken(header);
+            List<RoomDto> rooms = this.roomService.getRooms(token);
+            return new ResponseEntity<>(rooms,HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+        }
+    }
     @PostMapping("message")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SuccessOrFailDto> sendMessage(@RequestHeader Map<String,String> header, @RequestBody SendMessageDto messageDto){
@@ -64,6 +76,19 @@ public class RoomController {
         }
         catch (Exception e){
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<SuccessOrFailDto> deleteRoom(@RequestHeader Map<String ,String> header,@RequestParam Long roomId){
+        try{
+            String token = extractToken(header);
+            this.roomService.deleteRoom(token,roomId);
+            return new ResponseEntity<>(new SuccessOrFailDto(true),HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(new SuccessOrFailDto(false),HttpStatus.BAD_REQUEST);
         }
     }
     private String extractToken(Map<String,String> headers){

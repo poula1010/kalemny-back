@@ -1,6 +1,7 @@
 package com.pooh.discordspring.service.impl;
 
 import com.pooh.discordspring.dto.MessageDto;
+import com.pooh.discordspring.dto.RoomDto;
 import com.pooh.discordspring.entity.Messages;
 import com.pooh.discordspring.entity.Room;
 import com.pooh.discordspring.entity.User;
@@ -41,6 +42,26 @@ public class RoomServiceImpl implements RoomService {
         User user = this.userRepository.findByUsername(this.jwtTokenProvider.getUsername(token)).orElseThrow();
         if(room.getUsers().contains(user)){
             return room.getMessages().stream().map(Messages::toMessageDto).collect(Collectors.toList());
+        }
+        else {
+            throw new Exception("not a user");
+        }
+    }
+
+    @Override
+    public List<RoomDto> getRooms(String token) {
+        String username = this.jwtTokenProvider.getUsername(token);
+        User user = this.userRepository.findByUsername(username).orElseThrow();
+        List<RoomDto> rooms = user.getRooms().stream().map(Room::toRoomDto).collect(Collectors.toList());
+        return rooms;
+    }
+
+    @Override
+    public void deleteRoom(String token, Long roomId) throws Exception {
+        Room room = this.roomRepository.findById(roomId).orElseThrow();
+        User user = this.userRepository.findByUsername(this.jwtTokenProvider.getUsername(token)).orElseThrow();
+        if(room.getUsers().contains(user)){
+            this.roomRepository.deleteById(roomId);
         }
         else {
             throw new Exception("not a user");

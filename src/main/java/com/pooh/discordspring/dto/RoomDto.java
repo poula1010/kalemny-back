@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 public class RoomDto {
     private List<Long> userIds;
-
+    private long roomId;
     private String roomName;
 }
